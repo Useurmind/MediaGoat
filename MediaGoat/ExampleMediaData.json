@@ -1,0 +1,17 @@
+﻿[
+    {
+        "Title": "Hello World",
+        "Artist": "Jochen Grün",
+        "Album": ".Net Core"
+    },
+    {
+        "Title": "Hello World 2",
+        "Artist": "Jochen Grün",
+        "Album": ".Net Core"
+    },
+    {
+        "Title": "Good Bye World",
+        "Artist": "Jochen Grün",
+        "Album": ".Net Core"
+    }
+]

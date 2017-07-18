@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MediaGoat.Services;
+using MediaGoat.Utility.Lucene;
+using System.IO;
 
 namespace MediaGoat
 {
@@ -23,6 +26,12 @@ namespace MediaGoat
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            services.AddSingleton<LuceneIndexerThread>(sp => new LuceneIndexerThread(sp.GetService<ILuceneIndexer>()));
+            services.AddTransient<IDocumentMapper>(sp => new AutoPropertyDocumentMapper());
+            services.AddTransient<DocumentCollectionPropertyMapper>(sp => new DocumentCollectionPropertyMapper(sp.GetService<IDocumentMapper>()));
+            services.AddTransient<IMediaSearchService>(sp => new MediaSearchService(sp.GetService<IConfiguration>(), sp.GetService<DocumentCollectionPropertyMapper>()));
+            services.AddTransient<ILuceneIndexer>(sp => new LuceneJsonIndexer<Song>(sp.GetService<IConfiguration>(), sp.GetService<DocumentCollectionPropertyMapper>()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,6 +63,8 @@ namespace MediaGoat
                     name: "spa-fallback",
                     defaults: new { controller = "Home", action = "Index" });
             });
+
+            app.ApplicationServices.GetService<LuceneIndexerThread>().Run();
         }
     }
 }
