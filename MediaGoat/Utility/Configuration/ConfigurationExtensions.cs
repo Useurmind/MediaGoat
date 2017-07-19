@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,11 @@ namespace MediaGoat.Utility.Configuration
         public static string GetLuceneJsonDataPath(this IConfiguration configuration)
         {
             return configuration["Lucene:JsonDataPath"];
+        }
+
+        public static IEnumerable<string> GetLuceneMediaPaths (this IConfiguration configuration)
+        {
+            return configuration.GetSection("Lucene:MediaPaths").Get<List<string>>();
         }
     }
 }
