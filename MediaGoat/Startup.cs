@@ -11,6 +11,8 @@ using MediaGoat.Services;
 using MediaGoat.Utility.Lucene;
 using System.IO;
 using MediaGoat.Utility.Configuration;
+using Serilog;
+using Serilog.Formatting.Json;
 
 namespace MediaGoat
 {
@@ -28,12 +30,17 @@ namespace MediaGoat
         {
             services.AddMvc();
 
+            services.AddSingleton<Serilog.ILogger>(sp => new LoggerConfiguration()
+                .WriteTo.RollingFile(new JsonFormatter(), "log-{Date}.txt")
+                .MinimumLevel.Debug()
+                .CreateLogger());
+
             services.AddSingleton<LuceneIndexerThread>(sp => new LuceneIndexerThread(sp.GetService<ILuceneIndexer>()));
             services.AddTransient<IDocumentMapper>(sp => new AutoPropertyDocumentMapper());
             services.AddTransient<DocumentCollectionPropertyMapper>(sp => new DocumentCollectionPropertyMapper(sp.GetService<IDocumentMapper>()));
             services.AddTransient<IMediaSearchService>(sp => new MediaSearchService(sp.GetService<IConfiguration>(), sp.GetService<DocumentCollectionPropertyMapper>()));
             //services.AddTransient<ILuceneIndexer>(sp => new LuceneJsonIndexer<Song>(sp.GetService<IConfiguration>(), sp.GetService<DocumentCollectionPropertyMapper>()));
-            services.AddTransient<ILuceneIndexer>(sp => new LuceneSongFileIndexer(Configuration.GetLuceneMediaPaths(), Configuration.GetLuceneIndexPath(),  sp.GetService<DocumentCollectionPropertyMapper>()));
+            services.AddTransient<ILuceneIndexer>(sp => new LuceneSongFileIndexer(Configuration.GetLuceneMediaPaths(), Configuration.GetLuceneIndexPath(),  sp.GetService<DocumentCollectionPropertyMapper>(), sp.GetService<ILogger>()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

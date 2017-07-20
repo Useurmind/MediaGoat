@@ -44,7 +44,11 @@ namespace MediaGoat.Utility.Lucene
             foreach (var property in this.GetMappedProperties(typeof(T)))
             {
                 var propertyValue = property.GetValue(model);
-                doc.Add(new Field(property.Name, propertyValue.ToString(), Field.Store.YES, Field.Index.ANALYZED));
+                if(propertyValue == null)
+                {
+                    propertyValue = string.Empty;
+                }
+                doc.Add(new Field(property.Name, propertyValue?.ToString(), Field.Store.YES, Field.Index.ANALYZED));
             }
             return doc;
         }

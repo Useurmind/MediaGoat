@@ -14,6 +14,7 @@ using Lucene.Net.QueryParsers.Classic;
 using MediaGoat.Utility.Lucene;
 using Microsoft.Extensions.Configuration;
 using MediaGoat.Utility.Configuration;
+using Serilog;
 
 namespace MediaGoat.Services
 {
@@ -29,6 +30,7 @@ namespace MediaGoat.Services
     {
         private Analyzer analyzer;
         private DocumentCollectionPropertyMapper mapper;
+        private ILogger logger;
         private string indexPath;
 
         public MediaSearchService(IConfiguration configuration, DocumentCollectionPropertyMapper mapper)
@@ -36,7 +38,6 @@ namespace MediaGoat.Services
             this.indexPath = configuration.GetLuceneIndexPath();
             this.analyzer = new Lucene.Net.Analysis.Standard.StandardAnalyzer(Lucene.Net.Util.LuceneVersion.LUCENE_CURRENT);
             this.mapper = mapper;
-
         }
 
         public Song GetSong(Guid songId)
@@ -45,17 +46,17 @@ namespace MediaGoat.Services
             {
                 IndexSearcher searcher = new IndexSearcher(indexReader);
 
-                var queryParser = new MultiFieldQueryParser(Lucene.Net.Util.LuceneVersion.LUCENE_CURRENT, new[] { "Guid" }, analyzer);
+                var queryParser = new QueryParser(Lucene.Net.Util.LuceneVersion.LUCENE_CURRENT, "Guid", analyzer);
 
                 Query query = queryParser.Parse(songId.ToString());
                 var topDocs = searcher.Search(query, 2);
 
-                if (topDocs.TotalHits > 1)
-                {
-                    throw new Exception($"Found multiple Songs with guid {songId}");
-                }
+                //if (topDocs.TotalHits > 1)
+                //{
+                //    throw new Exception($"Found multiple Songs with guid {songId}");
+                //}
 
-                var doc = searcher.Doc(topDocs.ScoreDocs.Single().Doc);
+                var doc = searcher.Doc(topDocs.ScoreDocs.First().Doc);
                 return this.mapper.Map<Song>(new[] { doc }).First();
             }
         }
