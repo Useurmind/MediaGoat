@@ -47,6 +47,10 @@ class Songs extends React.Component<SongsProps, SongsUiState> {
                                 <td>{s.title}</td>
                                 <td>{s.artist}</td>
                                 <td>{s.album}</td>
+                                <td><audio controls>
+                                    <source src={s.url} type="audio/mpeg" />
+                                </audio>
+                                </td>
                             </tr>
                         )
                     }

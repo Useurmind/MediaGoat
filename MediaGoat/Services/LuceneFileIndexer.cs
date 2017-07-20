@@ -60,9 +60,12 @@ namespace MediaGoat.Services
                 var tagLibFile = TagLib.File.Create(x);
                 return new Song()
                 {
+                    Guid = Guid.NewGuid(),
                     Artist = tagLibFile.Tag.FirstAlbumArtist,
                     Album = tagLibFile.Tag.Album,
-                    Title = tagLibFile.Tag.Title
+                    Title = tagLibFile.Tag.Title,
+                    FilePath = x,
+                    ContentType = "audio/mpeg"
                 };
             });
         }

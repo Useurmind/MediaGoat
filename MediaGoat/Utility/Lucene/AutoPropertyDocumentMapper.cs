@@ -20,7 +20,20 @@ namespace MediaGoat.Utility.Lucene
             var model = new T();
             foreach (var property in this.GetMappedProperties(typeof(T)))
             {
-                property.SetValue(model, doc.Get(property.Name));
+                var stringValue = doc.Get(property.Name);
+
+                if (property.PropertyType == typeof(string))
+                {
+                    property.SetValue(model, stringValue);
+                }
+                else if (property.PropertyType == typeof(Guid))
+                {
+                    property.SetValue(model, new Guid(stringValue));
+                }
+                else
+                {
+                    throw new NotImplementedException($"The type {property.PropertyType.Name} is not mapped to a model type");
+                }
             }
             return model;
         }

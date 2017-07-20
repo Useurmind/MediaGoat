@@ -6,9 +6,11 @@ import { fetch, addTask } from 'domain-task';
 // STATE - This defines the type of data maintained in the Redux store.
 
 export interface Song {
+    guid: string;
     title: string;
     artist: string;
     album: string;
+    url: string;
 }
 
 export interface SongsState {

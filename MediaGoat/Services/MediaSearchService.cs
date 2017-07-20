@@ -17,15 +17,11 @@ using MediaGoat.Utility.Configuration;
 
 namespace MediaGoat.Services
 {
-    public class Song
-    {
-        public string Title { get; set; }
-        public string Artist { get; set; }
-        public string Album { get; set; }
-    }
 
     public interface IMediaSearchService
     {
+        Song GetSong(Guid songId);
+
         IEnumerable<Song> SearchSongs(string searchString);
     }
 
@@ -41,6 +37,27 @@ namespace MediaGoat.Services
             this.analyzer = new Lucene.Net.Analysis.Standard.StandardAnalyzer(Lucene.Net.Util.LuceneVersion.LUCENE_CURRENT);
             this.mapper = mapper;
 
+        }
+
+        public Song GetSong(Guid songId)
+        {
+            using (var indexReader = DirectoryReader.Open(FSDirectory.Open(new DirectoryInfo(indexPath))))
+            {
+                IndexSearcher searcher = new IndexSearcher(indexReader);
+
+                var queryParser = new MultiFieldQueryParser(Lucene.Net.Util.LuceneVersion.LUCENE_CURRENT, new[] { "Guid" }, analyzer);
+
+                Query query = queryParser.Parse(songId.ToString());
+                var topDocs = searcher.Search(query, 2);
+
+                if (topDocs.TotalHits > 1)
+                {
+                    throw new Exception($"Found multiple Songs with guid {songId}");
+                }
+
+                var doc = searcher.Doc(topDocs.ScoreDocs.Single().Doc);
+                return this.mapper.Map<Song>(new[] { doc }).First();
+            }
         }
 
         public IEnumerable<Song> SearchSongs(string searchString)
