@@ -8,6 +8,8 @@ namespace MediaGoat.Services
 {
     public class LuceneIndexerThread
     {
+        int status = 0;
+
         private ILuceneIndexer indexer;
 
         public LuceneIndexerThread(ILuceneIndexer indexer)
@@ -17,10 +19,24 @@ namespace MediaGoat.Services
 
         public void Run()
         {
-            new Thread(() =>
+            var wasNotRunning = Interlocked.CompareExchange(ref status, 1, 0) == 0;
+            if (wasNotRunning)
             {
-                this.indexer.StartIndexing();
-            }).Start();            
+                new Thread(() =>
+                {
+                    try
+                    {
+                        this.indexer.StartIndexing();
+                    }
+                    finally
+                    {
+                        Thread.VolatileWrite(ref status, 0);
+                    }
+                }).Start();
+            }else
+            {
+                throw new Exception("The index thread is already running");
+            }
         }
     }
 }

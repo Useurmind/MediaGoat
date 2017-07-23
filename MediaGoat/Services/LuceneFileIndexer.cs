@@ -47,22 +47,23 @@ namespace MediaGoat.Services
                     logger.Debug($"Indexing files in path {mediaPath}");
 
                     logger.Debug("Starting to retrieve files with Id3 tags");
-                    var dataModels = GetMp3SongModelsRecursive(mediaPath).ToList();
-                    logger.Debug("Finished to retrieve files with Id3 tags, starting indexing");
 
-                    var documents = mapper.Map<Song>(dataModels).ToList();
-                    foreach (var doc in documents)
+                    ForEachSongInMediaDirectory(mediaPath, song =>
                     {
-                        writer.AddDocument(doc);
-                        counter++;
-                    }
+                        var documents = mapper.Map<Song>(new[] { song }).ToList();
+                        foreach (var doc in documents)
+                        {
+                            writer.AddDocument(doc);
+                            counter++;
+                        }
 
-                    if (counter % 1000 == 0)
-                    {
-                        logger.Debug($"Starting intermediate index comit with {counter} elements");
-                        writer.Commit();
-                        logger.Debug($"Finished intermediate index comit with {counter} elements");
-                    }
+                        if (counter % 1000 == 0)
+                        {
+                            logger.Debug($"Starting intermediate index comit with {counter} elements");
+                            writer.Commit();
+                            logger.Debug($"Finished intermediate index comit with {counter} elements");
+                        }
+                    });                    
                 }
 
                 writer.Commit();
@@ -71,23 +72,25 @@ namespace MediaGoat.Services
             logger.Debug("Finished indexing of song files");
         }
 
-        private IEnumerable<Song> GetMp3SongModelsRecursive(string mediaPath)
+        private void ForEachSongInMediaDirectory(string mediaPath, Action<Song> forEachSong)
         {
-            var files = new List<string>();
-            FileHelper.GetFilesRecursive(mediaPath, files);
-
-            return files.Where(x => Regex.IsMatch(x, @"(\.mp3$)|(\.ogg$)|(\.wav$)")).Select(x =>
+            FileHelper.ForEachFileRecursive(mediaPath, filePath =>
             {
-                var tagLibFile = TagLib.File.Create(x);
-                return new Song()
+                if(Regex.IsMatch(filePath, @"(\.mp3$)|(\.ogg$)|(\.wav$)"))
                 {
-                    Guid = Guid.NewGuid(),
-                    Artist = tagLibFile.Tag.FirstAlbumArtist,
-                    Album = tagLibFile.Tag.Album,
-                    Title = tagLibFile.Tag.Title,
-                    FilePath = x,
-                    ContentType = ContentTypeHelper.GetContentType(x)
-                };
+                    var tagLibFile = TagLib.File.Create(filePath);
+                    var song = new Song()
+                    {
+                        Guid = Guid.NewGuid(),
+                        Artist = tagLibFile.Tag.FirstAlbumArtist,
+                        Album = tagLibFile.Tag.Album,
+                        Title = tagLibFile.Tag.Title,
+                        FilePath = filePath,
+                        ContentType = ContentTypeHelper.GetContentType(filePath)
+                    };
+
+                    forEachSong(song);
+                }
             });
         }
     }

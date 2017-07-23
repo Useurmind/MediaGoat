@@ -1,6 +1,6 @@
 {
-  "name": "MediaGoat",
-  "version": "0.0.0",
+    "name": "MediaGoat",
+    "version": "0.0.0",
     "dependencies": {
         "@types/history": "4.5.1",
         "@types/react": "15.0.35",
@@ -37,6 +37,7 @@
         "url-loader": "0.5.8",
         "webpack": "2.5.1",
         "webpack-hot-middleware": "2.18.0",
-        "webpack-merge": "4.1.0"
+        "webpack-merge": "4.1.0",
+        "font-awesome": "4.7.0"
     }
 }

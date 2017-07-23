@@ -3,6 +3,7 @@ import { Link, RouteComponentProps } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { ApplicationState } from '../store';
 import * as SongsStore from '../store/Songs';
+import * as PlayerStore from "../store/Player";
 
 interface SongsUiState {
     searchString: string
@@ -11,6 +12,7 @@ interface SongsUiState {
 type SongsProps =
     SongsStore.SongsState
     & typeof SongsStore.actionCreators
+    & typeof PlayerStore.actionCreators
     & RouteComponentProps<{}>;
 
 class Songs extends React.Component<SongsProps, SongsUiState> {
@@ -28,13 +30,21 @@ class Songs extends React.Component<SongsProps, SongsUiState> {
             <h1>Songs</h1>
 
             <p>Search for songs.</p>
-
-            <input type="text" onChange={(e) => this.setState({ searchString: e.target.value })} />
-            <button onClick={() => { this.props.searchSongs(this.state.searchString) }}>Search</button>
+            
+                <div className="form-group">
+                    <label htmlFor="searchString">Search text (in Artist, Title, Album):</label>
+                    <input type="text"
+                        className="form-control"
+                        id="searchString"
+                        onChange={(e) => this.setState({ searchString: e.target.value })}
+                        onKeyPress={e => { if (e.key === "Enter") this.props.searchSongs(this.state.searchString); }} />
+                </div>
+                <button type="button" className="btn btn-default" onClick={() => { this.props.searchSongs(this.state.searchString) }}>Search</button>
 
             <table className='table'>
                 <thead>
                     <tr>
+                        <th></th>
                         <th>Title</th>
                         <th>Artist</th>
                         <th>Album</th>
@@ -43,14 +53,15 @@ class Songs extends React.Component<SongsProps, SongsUiState> {
                 <tbody>
                     {
                         this.props.songs.map(s =>
-                            <tr key={s.title}>
+                            <tr key={s.guid}>
+                                <td>
+                                    <button onClick={e => this.props.playSong(s)}>
+                                        <i className="fa fa-play" aria-hidden="true"></i>
+                                    </button>
+                                </td>
                                 <td>{s.title}</td>
                                 <td>{s.artist}</td>
                                 <td>{s.album}</td>
-                                <td><audio controls>
-                                    <source src={s.url} type="audio/mpeg" />
-                                </audio>
-                                </td>
                             </tr>
                         )
                     }
@@ -62,6 +73,6 @@ class Songs extends React.Component<SongsProps, SongsUiState> {
 
 // Wire up the React component to the Redux store
 export default connect(
-    (state: ApplicationState) => state.songs, // Selects which state properties are merged into the component's props
-    SongsStore.actionCreators                 // Selects which action creators are merged into the component's props
+    (state: ApplicationState) => state.songs,                                       // Selects which state properties are merged into the component's props
+    { ...SongsStore.actionCreators, ...PlayerStore.actionCreators }                 // Selects which action creators are merged into the component's props
 )(Songs) as typeof Songs;

@@ -15,6 +15,7 @@ namespace MediaGoat.Models
             this.Title = song.Title;
             this.Artist = song.Artist;
             this.Url = url;
+            this.ContentType = song.ContentType;
         }
 
         public Guid Guid { get; set; }
@@ -28,5 +29,7 @@ namespace MediaGoat.Models
         public string Album { get; set; }
 
         public string Url { get; set; }
+
+        public string ContentType { get; set; }
     }
 }

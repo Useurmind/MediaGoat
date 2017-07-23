@@ -1,6 +1,7 @@
 import { Action, Reducer } from 'redux';
 import { AppThunkAction } from './';
 import { fetch, addTask } from 'domain-task';
+import * as Player from "./Player";
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -11,12 +12,14 @@ export interface Song {
     artist: string;
     album: string;
     url: string;
+    contentType: string;
 }
 
 export interface SongsState {
     songs: Song[];
     isLoading: boolean;
     searchString: string;
+    playedSong: Song;
 }
 
 // -----------------
@@ -41,7 +44,7 @@ export const actionCreators = {
         let fetchTask = fetch(`/api/Song/Songs?searchString=${searchString}`)
             .then(response => response.json() as Promise<Song[]>)
             .then(data => {
-                dispatch({ type: 'ReceiveSongsAction', songs: data });
+                dispatch(actionCreators.receiveSongs(data));
             });
 
         addTask(fetchTask); // Ensure server-side prerendering waits for this to complete
@@ -59,13 +62,15 @@ export const reducer: Reducer<SongsState> = (state: SongsState, action: KnownAct
             return {
                 songs: state.songs,
                 isLoading: true,
-                searchString: action.searchString
+                searchString: action.searchString,
+                playedSong: state.playedSong
             };
         case 'ReceiveSongsAction':
             return {
                 songs: action.songs,
                 isLoading: false,
-                searchString: state.searchString
+                searchString: state.searchString,
+                playedSong: state.playedSong
             };
         default:
             // The following line guarantees that every action in the KnownAction union has been covered by a case above
@@ -74,5 +79,5 @@ export const reducer: Reducer<SongsState> = (state: SongsState, action: KnownAct
 
     // For unrecognized actions (or in cases where actions have no effect), must return the existing state
     //  (or default initial state if none was supplied)
-    return state || { songs: [], isLoading: false, searchString: "" };
+    return state || { songs: [], isLoading: false, searchString: "", playedSong: null };
 };

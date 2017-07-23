@@ -72,8 +72,6 @@ namespace MediaGoat
                     name: "spa-fallback",
                     defaults: new { controller = "Home", action = "Index" });
             });
-
-            app.ApplicationServices.GetService<LuceneIndexerThread>().Run();
         }
     }
 }
