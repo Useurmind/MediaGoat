@@ -1,4 +1,4 @@
-﻿using MediaGoat.Services;
+﻿using MediaGoat.Domain.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;

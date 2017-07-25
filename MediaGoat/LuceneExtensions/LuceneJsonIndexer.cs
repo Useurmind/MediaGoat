@@ -1,7 +1,6 @@
 ﻿using Lucene.Net.Index;
 using Lucene.Net.Store;
 using MediaGoat.Utility.Configuration;
-using MediaGoat.Utility.Lucene;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
@@ -10,13 +9,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MediaGoat.Services
+namespace MediaGoat.LuceneExtensions
 {
-    public interface ILuceneIndexer
-    {
-        void StartIndexing();
-    }
-
     public class LuceneJsonIndexer<T> : ILuceneIndexer
     {
         private string indexPath;
@@ -30,8 +24,10 @@ namespace MediaGoat.Services
             this.mapper = mapper;
         }
 
-        public void StartIndexing()
+        public long StartIndexing(IObserver<long> currentIndexedNumber)
         {
+            long numberIndexedItems = 0;
+
             var jsonData = string.Join(@"", File.ReadAllLines(jsonDataPath));
             var dataModels = JsonConvert.DeserializeObject<IEnumerable<T>>(jsonData);
 
@@ -50,9 +46,13 @@ namespace MediaGoat.Services
                 foreach (var doc in documents)
                 {
                     writer.AddDocument(doc);
+                    numberIndexedItems++;
+                    currentIndexedNumber.OnNext(numberIndexedItems);
                 }
                 writer.Commit();
             }
+
+            return numberIndexedItems;
         }
     }
 }

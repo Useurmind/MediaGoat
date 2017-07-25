@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MediaGoat.Utility.Lucene
+namespace MediaGoat.LuceneExtensions
 {
     public class DocumentCollectionPropertyMapper
     {

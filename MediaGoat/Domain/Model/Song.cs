@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MediaGoat.Services
+namespace MediaGoat.Domain.Model
 {
     public class Song
     {

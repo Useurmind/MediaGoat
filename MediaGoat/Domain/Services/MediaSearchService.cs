@@ -11,21 +11,14 @@ using Lucene.Net.Store;
 using Lucene.Net.Documents;
 using Lucene.Net.Search;
 using Lucene.Net.QueryParsers.Classic;
-using MediaGoat.Utility.Lucene;
 using Microsoft.Extensions.Configuration;
 using MediaGoat.Utility.Configuration;
 using Serilog;
+using MediaGoat.Domain.Model;
+using MediaGoat.LuceneExtensions;
 
-namespace MediaGoat.Services
+namespace MediaGoat.Domain.Services
 {
-
-    public interface IMediaSearchService
-    {
-        Song GetSong(Guid songId);
-
-        IEnumerable<Song> SearchSongs(string searchString);
-    }
-
     public class MediaSearchService : IMediaSearchService
     {
         private Analyzer analyzer;

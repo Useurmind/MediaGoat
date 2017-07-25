@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace MediaGoat.Utility.Lucene
+namespace MediaGoat.LuceneExtensions
 {
 
     public class AutoPropertyDocumentMapper : IDocumentMapper

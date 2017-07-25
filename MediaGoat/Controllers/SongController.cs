@@ -1,5 +1,5 @@
-﻿using MediaGoat.Models;
-using MediaGoat.Services;
+﻿using MediaGoat.Domain.Services;
+using MediaGoat.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;

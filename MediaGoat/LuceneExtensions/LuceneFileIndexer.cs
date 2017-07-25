@@ -1,16 +1,17 @@
 ﻿using Lucene.Net.Index;
 using Lucene.Net.Store;
+using MediaGoat.Domain.Model;
 using MediaGoat.Utility;
-using MediaGoat.Utility.Lucene;
 using Serilog;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace MediaGoat.Services
+namespace MediaGoat.LuceneExtensions
 {
     public class LuceneSongFileIndexer : ILuceneIndexer
     {
@@ -27,7 +28,7 @@ namespace MediaGoat.Services
             this.logger = logger;
         }
 
-        public void StartIndexing()
+        public long StartIndexing(IObserver<long> currentIndexedNumber)
         {
             logger.Debug("Starting indexing of song files");
 
@@ -55,6 +56,7 @@ namespace MediaGoat.Services
                         {
                             writer.AddDocument(doc);
                             counter++;
+                            currentIndexedNumber.OnNext(counter);
                         }
 
                         if (counter % 1000 == 0)
@@ -63,33 +65,47 @@ namespace MediaGoat.Services
                             writer.Commit();
                             logger.Debug($"Finished intermediate index comit with {counter} elements");
                         }
-                    });                    
+                    });
                 }
 
                 writer.Commit();
             }
 
             logger.Debug("Finished indexing of song files");
+
+            return counter;
         }
 
         private void ForEachSongInMediaDirectory(string mediaPath, Action<Song> forEachSong)
         {
             FileHelper.ForEachFileRecursive(mediaPath, filePath =>
             {
-                if(Regex.IsMatch(filePath, @"(\.mp3$)|(\.ogg$)|(\.wav$)"))
+                if (Regex.IsMatch(filePath, @"(\.mp3$)|(\.ogg$)|(\.wav$)"))
                 {
-                    var tagLibFile = TagLib.File.Create(filePath);
-                    var song = new Song()
+                    try
                     {
-                        Guid = Guid.NewGuid(),
-                        Artist = tagLibFile.Tag.FirstAlbumArtist,
-                        Album = tagLibFile.Tag.Album,
-                        Title = tagLibFile.Tag.Title,
-                        FilePath = filePath,
-                        ContentType = ContentTypeHelper.GetContentType(filePath)
-                    };
+                        var tagLibFile = TagLib.File.Create(filePath);
+                        var allArtists = tagLibFile.Tag.AlbumArtists.Union(new[] { tagLibFile.Tag.FirstAlbumArtist })
+                        .Union(tagLibFile.Tag.Performers)
+                        .Where(x => !string.IsNullOrEmpty(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase);
 
-                    forEachSong(song);
+                        var song = new Song()
+                        {
+                            Guid = Guid.NewGuid(),
+                            Artist = string.Join(", ", allArtists),
+                            Album = tagLibFile.Tag.Album,
+                            Title = tagLibFile.Tag.Title,
+                            FilePath = filePath,
+                            ContentType = ContentTypeHelper.GetContentType(filePath)
+                        };
+
+                        forEachSong(song);
+                    }
+                    catch (TagLib.CorruptFileException cfe)
+                    {
+                        logger.Error(cfe, $"File {filePath} is corrupt according to tag lib.");
+                    }
                 }
             });
         }

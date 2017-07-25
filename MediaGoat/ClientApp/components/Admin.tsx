@@ -22,9 +22,76 @@ class Admin extends React.Component<AdminProps, AdminState> {
         };
     }
 
+    componentDidMount() {
+        this.props.startGettingIndexState();
+    }
+
+    componentWillUnmount() {
+        this.props.stopGettingIndexState();
+    }
+
     public render() {
+        let indexResult = this.props.indexResult;
+
+        let indexStateIcon = null;
+        let buttonClass = null;
+        let alertClass = null;
+        let alertText = null;
+        switch (indexResult.status) {
+            case AdminStore.IndexState.None:
+                indexStateIcon = <i className="fa fa-ban"></i>;
+                buttonClass = "btn-info";
+                alertClass = "alert-info";
+                alertText = indexResult.message;
+                break;
+            case AdminStore.IndexState.Running:
+                indexStateIcon = <i className="fa fa-circle-o-notch fa-spin fa-fw"></i>;
+                buttonClass = "btn-info";
+                alertClass = "alert-info";
+                alertText = `${indexResult.message}. Start on ${indexResult.startTime}`;
+                break;
+            case AdminStore.IndexState.Success:
+                indexStateIcon = <i className="fa fa-check" aria-hidden="true" ></i>
+                buttonClass = "btn-success";
+                alertClass = "alert-success";
+                alertText = `${indexResult.message}. Start on ${indexResult.startTime}. End on ${indexResult.stopTime}.`;
+                break;
+            case AdminStore.IndexState.Failed:
+                indexStateIcon = <i className="fa fa-times"></i>
+                buttonClass = "btn-danger";
+                alertClass = "alert-error";
+                alertText = `${indexResult.message}. Start on ${indexResult.startTime}. End on ${indexResult.stopTime}.`;
+                break;
+        }
+
+        let indexAlert = <div className={`alert ${alertClass}`} role="alert">
+            {alertText}
+        </div>
+
+
+
         return <div>
-            <button onClick={e => this.props.startIndexRun()}>Start Index Run</button>
+            <h1>Admin functions</h1>
+            <div className="panel panel-default">
+                <div className="panel-heading">
+                    Indexing
+                </div>
+                <div className="panel-body">
+                    <div className="form-group">
+                        <label htmlFor="triggerIndexing">Index media files:</label>
+                        <div className="input-group" id="triggerIndexing">
+                            <span className="input-group-btn">
+                                <button onClick={e => this.props.startIndexRun()} className="btn btn-default">Start Index Run</button>
+                                <button className={`btn ${buttonClass}`}>
+                                    {indexStateIcon}
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    {indexAlert}
+                </div>
+            </div>
         </div>;
     }
 }

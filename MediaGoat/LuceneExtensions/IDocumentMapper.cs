@@ -1,6 +1,6 @@
 ﻿using Lucene.Net.Documents;
 
-namespace MediaGoat.Utility.Lucene
+namespace MediaGoat.LuceneExtensions
 {
     public interface IDocumentMapper
     {

@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MediaGoat.Services;
-using MediaGoat.Utility.Lucene;
 using System.IO;
 using MediaGoat.Utility.Configuration;
 using Serilog;
 using Serilog.Formatting.Json;
+using MediaGoat.LuceneExtensions;
+using MediaGoat.Domain.Services;
 
 namespace MediaGoat
 {
