@@ -16,8 +16,8 @@ export enum IndexState {
 export interface IndexResult {
     status: IndexState,
     message?: string,
-    startTime?: string,
-    stopTime?: string
+    startTime?: Date,
+    stopTime?: Date
 }
 
 export interface AdminState {
@@ -57,7 +57,13 @@ export const actionCreators = {
                 let fetchTask = fetch("/api/Admin/CurrentIndexingResult")
                     .then(response => response.json() as IndexResult)
                     .then(data => {
-                        dispatch(actionCreators.receiveIndexState(data));
+                        let typedData = {
+                            ...data,
+                            startTime: data.startTime ? new Date(data.startTime) : null,
+                            stopTime: data.stopTime ? new Date(data.stopTime) : null
+                        }
+
+                        dispatch(actionCreators.receiveIndexState(typedData));
                     });
 
                 addTask(fetchTask);

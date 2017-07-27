@@ -7,7 +7,7 @@ namespace MediaGoat.LuceneExtensions
         public LuceneIndexingStatus Status { get; set; }
         public string Message { get; set; }
         public DateTime? StartTime { get; set; }
-        public DateTime? FinishTime { get; set; }
+        public DateTime? StopTime { get; set; }
 
         public static LuceneIndexingResult None()
         {
@@ -25,7 +25,7 @@ namespace MediaGoat.LuceneExtensions
                 Status = LuceneIndexingStatus.Running,
                 Message = $"Indexing currently running, already indexed {currentNumber} items",
                 StartTime = startTime,
-                FinishTime = null
+                StopTime = null
             };
         }
 
@@ -36,7 +36,7 @@ namespace MediaGoat.LuceneExtensions
                 Status = LuceneIndexingStatus.Success,
                 Message = $"Indexing finished successfully after {numberIndexedItems} items",
                 StartTime = startTime,
-                FinishTime = DateTime.Now
+                StopTime = DateTime.Now
             };
         }
 
@@ -47,7 +47,7 @@ namespace MediaGoat.LuceneExtensions
                 Status = LuceneIndexingStatus.Failed,
                 Message = $"Indexing failed with:\r\n{e.ToString()}",
                 StartTime = startTime,
-                FinishTime = DateTime.Now
+                StopTime = DateTime.Now
             };
         }
     }

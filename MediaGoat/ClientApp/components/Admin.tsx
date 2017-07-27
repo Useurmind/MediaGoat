@@ -36,32 +36,35 @@ class Admin extends React.Component<AdminProps, AdminState> {
         let indexStateIcon = null;
         let buttonClass = null;
         let alertClass = null;
-        let alertText = null;
+        let alertText = indexResult.message;
         switch (indexResult.status) {
             case AdminStore.IndexState.None:
                 indexStateIcon = <i className="fa fa-ban"></i>;
                 buttonClass = "btn-info";
                 alertClass = "alert-info";
-                alertText = indexResult.message;
                 break;
             case AdminStore.IndexState.Running:
                 indexStateIcon = <i className="fa fa-circle-o-notch fa-spin fa-fw"></i>;
                 buttonClass = "btn-info";
                 alertClass = "alert-info";
-                alertText = `${indexResult.message}. Start on ${indexResult.startTime}`;
                 break;
             case AdminStore.IndexState.Success:
                 indexStateIcon = <i className="fa fa-check" aria-hidden="true" ></i>
                 buttonClass = "btn-success";
                 alertClass = "alert-success";
-                alertText = `${indexResult.message}. Start on ${indexResult.startTime}. End on ${indexResult.stopTime}.`;
                 break;
             case AdminStore.IndexState.Failed:
                 indexStateIcon = <i className="fa fa-times"></i>
                 buttonClass = "btn-danger";
                 alertClass = "alert-error";
-                alertText = `${indexResult.message}. Start on ${indexResult.startTime}. End on ${indexResult.stopTime}.`;
                 break;
+        }
+
+        if (indexResult.startTime) {
+            alertText = `${alertText}. Started at ${indexResult.startTime.toLocaleString()}.`;
+        }
+        if (indexResult.stopTime) {
+            alertText = `${alertText} Stopped at ${indexResult.stopTime.toLocaleString()}.`;
         }
 
         let indexAlert = <div className={`alert ${alertClass}`} role="alert">

@@ -12,6 +12,7 @@ export interface Song {
     artist: string;
     album: string;
     url: string;
+    albumArtUrl: string;
     contentType: string;
 }
 
